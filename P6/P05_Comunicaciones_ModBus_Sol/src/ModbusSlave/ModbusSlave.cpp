@@ -454,18 +454,17 @@ int ModbusSlave::validate_request(unsigned char *data, unsigned char length)
 	}
 
 	/* check quantity of registers */
-	if (FC_READ_COILS == data[FUNC]){
-/*
-		regs_size = N_CRegs;
-		max_regs_num = MAX_READ_REGD;
-*/
+
+	// modbus funcion 2 de leer los discrete inputs
+	if (data[FUNC] == 2){ 
+		regs_size = 2000;
+		max_regs_num = 2000;
 	}
 
-	if (FC_READ_REG_AO == data[FUNC]){
-/*
-		regs_size = N_ARegs;
-		max_regs_num = MAX_READ_REGS;
-*/
+	// modbus funcion 1 de leer los coils
+	if (data[FUNC] == 1){ 
+		regs_size = 2000;
+		max_regs_num = 2000;
 	}
 	else if (FC_WRITE_REGS == data[FUNC]){
 /*
@@ -741,28 +740,14 @@ int ModbusSlave::update()
 	start_addr = ((int) query[START_H] << 8) + (int) query[START_L];
 
 	switch (query[FUNC]) {
-	case FC_READ_COILS:
-		return read_discrete_registers(FC_READ_COILS, start_addr,query[REGS_L],CRegs);
-		break;
-
-	case FC_READ_REG_DI:
-		return read_discrete_registers(FC_READ_REG_DI, start_addr,query[REGS_L],DRegs);
-		break;
-
-	case FC_READ_REG_AO:
-//		return read_holding_registers(start_addr,query[REGS_L],A_Regs);
-		break;
-
-	case FC_WRITE_REGS:
-//		return preset_multiple_registers(start_addr,query[REGS_L],query,A_Regs);
-		break;
-
-	case FC_WRITE_REG:
-//		write_single_register(start_addr,query,A_Regs);
-		break;
-
-	case FC_WRITE_COIL:
-		return write_coil(start_addr,query,CRegs);	
+		// switch hecho con codigos hex en funcion de los numeros de excepcion que devolvia
+		//  el arduino en la consola java 
+	case 1: // lee coils
+		return read_discrete_registers(1, start_addr, query[REGS_L], CRegs);
+	case 2: // leee discrete entries
+		return read_discrete_registers(2, start_addr, query[REGS_L], DRegs);
+	case 5: // escribe single coil
+		return write_coil(start_addr, query, CRegs);	
 	}
 
 	return 0;

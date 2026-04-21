@@ -35,15 +35,15 @@ void Interruptor(void *Sensor)
 
 void Pulsado_Soltado_ModBus(void *Sensor){
 	ptsSensor sensor = reinterpret_cast<ptsSensor>(Sensor);
-
+	
 	uint16_t estado = (sensor->valor_Df == sensor->valor) ? 0 : 1; 
 
 	if(sensor == &domoboard.BOTON1) {
-		Iregs[MB_BTN1] = estado;
+		bitWrite(Iregs[0], 0, estado); 
 	} else if(sensor == &domoboard.BOTON2) {
-		Iregs[MB_BTN2] = estado;
+		bitWrite(Iregs[0], 1, estado); 
 	} else if(sensor == &domoboard.BTN_OPT) {
-		Iregs[MB_BTN_OPT] = estado;
+		bitWrite(Iregs[0], 2, estado); 
 	}
 }
 

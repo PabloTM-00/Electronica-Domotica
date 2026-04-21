@@ -24,10 +24,8 @@ ModbusSlave mbs;
 /***************************************************
  * Definición Bancos de registros usados en ModBus *
  ***************************************************/
-uint16_t	Cregs[MB_O_COILS];		//Registros para "Dicrete Output Coils"
 
-uint16_t Cregs[MB_O_COILS];		
-uint16_t Iregs[MB_I_DISCRETE]; 
+uint16_t Iregs[MB_I_DISCRETE]; 	
 
 /****************************************************************************/
 /***                 Definición de funciones                              ***/
