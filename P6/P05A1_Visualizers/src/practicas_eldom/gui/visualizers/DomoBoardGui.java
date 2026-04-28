@@ -97,27 +97,29 @@ public class DomoBoardGui extends JPanel implements Visualizer {
 		ModBus_Communications.writeCoil(Integer.parseInt(address), reg, state, sn_Transport);  
 	}
 
+	
 	private void iniciarPolling() {
-		// timer cada 500 ms para no bloquear el hilo de la interfaz
+		// polling cada 500 ms 
 		pollingTimer = new Timer(500, e -> {
 			try {
 				int slaveAdd = Integer.parseInt(address);
-				// aprovecho la firma del metodo del .jar que actua por referencia y 
-				// rellena el array con la respuesta
+				//  la firma del metodo InitCommunication del .jar 
+				// que necesita un array de int[], se lo paso vacio
+				// y se rellena el array con la respuesta de manera auto
 				int[] estadosBotones = new int[3]; 
 				
 				ModBus_Communications.readInputDiscrete(slaveAdd, 0, 3, sn_Transport, estadosBotones, new Runnable() {
 					@Override
 					public void run() {
 						
-						// actualizar luces (dentro del hilo) asi se evita parpadeo
+						// actualizar luces 
 						ledBoton1.setLedOn(estadosBotones[0] == 1);
 						ledBoton2.setLedOn(estadosBotones[1] == 1);
 						ledOpto.setLedOn(estadosBotones[2] == 1);
 					}
 				});
 			} catch (Exception ex) {
-				// recogida de errores 	
+				// recogida de errores silenciosa
 			}
 		});
 		pollingTimer.start();

@@ -1,0 +1,113 @@
+/*
+ * ModbusDomoboard.cpp
+ *
+ *  Created on: 11 mar. 2020
+ *      Author: jctejero
+ *
+ *  Modified on: 17/03/2025
+ */
+
+#include "ModbusDomoboard.h"
+#include "debuglog.h"
+
+/****************************************************************************/
+/***        Variables Locales                                             ***/
+/****************************************************************************/
+
+/***************************************************
+ * Definición Bancos de registros usados en ModBus *
+ ***************************************************/
+uint16_t	Cregs[MB_O_COILS];		//Registros para "Dicrete Output Coils"
+uint16_t	Dregs[MB_I_CONTATCS];	//Registros para "Dicrete Input Contacts"
+
+ModbusDomoboard mbDomoboard;
+
+ModbusDomoboard::ModbusDomoboard():DomoBoard() {
+	//*****  Initialize ModBus Sensors  ****
+
+	//Initialize BOTON1 for ModBus
+	BOTON1.Sensor = &(DomoBoard::BOTON1);
+	BOTON1.mbReg = &Dregs[MB_BOTON1];
+	BOTON1.Aux = LOW;
+
+	listmbSensors.push(&BOTON1);
+
+	//Initialize BOTON1 for ModBus
+	BOTON2.Sensor = &(DomoBoard::BOTON2);
+	BOTON2.mbReg = &Dregs[MB_BOTON2];
+	BOTON2.Aux = LOW;
+
+	listmbSensors.push(&BOTON2);
+
+
+	//Initialize BOTON1 for ModBus
+	BTN_OPT.Sensor = &(DomoBoard::BTN_OPT);
+	BTN_OPT.mbReg = &Dregs[MB_BTNOPT];
+
+	listmbSensors.push(&BTN_OPT);
+
+	RELE.actuator 	= &(DomoBoard::RELE);
+	RELE.mbReg 		= &Cregs[MB_RELE];
+
+	TRIAC.actuator 	= &(DomoBoard::TRIAC);
+	TRIAC.mbReg 	= &Cregs[MB_TRIAC];
+}
+
+void ModbusDomoboard::leerAllSensor(void){
+	for(uint8_t i = 0; i < listmbSensors.count(); i++){
+		leerSensor(listmbSensors.peek(i));
+	}
+}
+
+void ModbusDomoboard::leerSensor(TpmbSensor Sensor){
+
+	DomoBoard::leerSensor(Sensor->Sensor);
+
+	//compueba si el valor leído por el sensor difiere del valor almacenado en el registro correspondiente
+	//del banco de registros
+	if((int16_t)(*(Sensor->mbReg)) != Sensor->Sensor->valor){
+		//Estado Sensor ha cambiado
+		//Se actualiza el registro correspondiente con el nuevo valor leído en el sensor.
+		*(Sensor->mbReg) = Sensor->Sensor->valor;
+		//Se inícia el evento asociado a la actualización del banco de registro correpondiente
+		if(Sensor->mbSensorEvent != NULL){
+			Sensor->mbSensorEvent(Sensor);
+		}
+	}
+}
+
+void	ModbusDomoboard::Clear_SensorsConfiguration(){
+	DomoBoard::Clear_SensorsConfiguration();
+
+	for(uint8_t i = 0; i < listmbSensors.count(); i++){
+		listmbSensors.peek(i)->mbActuators.clear();
+		listmbSensors.peek(i)->mbSensorEvent = NULL;
+	}	
+
+}
+
+
+void  ModbusDomoboard::setmbActuator(TmbActuator *Actuator, TStateDigitalDev val){
+	bool newVal = (bool)val;
+
+	if(val == TOGGLE){		
+		newVal = (*Actuator->mbReg) > 0 ? false : true;
+	}
+
+	if(*(Actuator->mbReg) != newVal){
+		*(Actuator->mbReg) = newVal;
+
+		setActuator(Actuator->actuator, *(Actuator->mbReg));
+
+	}
+}
+
+void ModbusDomoboard::manager_mbActuators(TmbActuators *Actuators, TStateDigitalDev val){
+	for(int n = 0; n < Actuators->count(); n++)
+		setmbActuator(Actuators->peek(n), val);
+
+}
+
+void leeSensoresmb(void){
+	mbDomoboard.leerAllSensor();
+}

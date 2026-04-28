@@ -20,6 +20,8 @@ public class ModBus_Communications {
 		InitModbusComunication(args, sn_Transport);
 	}
 
+	
+	// para poder enviar los estados
 	public static void readInputDiscrete(int SlaveAddress, int startReg, int numRegs, CommTransport sn_Transport, int[] resultados, Runnable alTerminar) {
 		String[] args = {Integer.toString(SlaveAddress), "2", Integer.toString(startReg), Integer.toString(numRegs)};
 		
@@ -27,6 +29,7 @@ public class ModBus_Communications {
 			@Override
 			public void run() {
 				try {
+					// aqui paso el array del domoboardGui.java
 					Modbus.InitComunication(args, sn_Transport, resultados);
 					
 					if(alTerminar != null){
@@ -36,6 +39,7 @@ public class ModBus_Communications {
 			}
 		});	
 	}
+	
 	
 	public static void InitModbusComunication(String[] args, CommTransport sCon) {
 		DefaultExecutorSupplier.getInstance().forBackgroundTasks().execute(new Runnable() {
