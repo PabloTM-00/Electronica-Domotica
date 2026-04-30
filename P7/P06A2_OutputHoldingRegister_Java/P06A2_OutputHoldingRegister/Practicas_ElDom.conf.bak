@@ -1,0 +1,10 @@
+#Configuration for Practicas_ElDom.conf
+#Wed Apr 09 13:38:56 CEST 2025
+BaudRate=115200
+Databits=8
+Parity=None
+Stopbits=1
+WinLocation=104, 68
+comPort=COM4
+serialConsole=true
+windowSize=752, 427
