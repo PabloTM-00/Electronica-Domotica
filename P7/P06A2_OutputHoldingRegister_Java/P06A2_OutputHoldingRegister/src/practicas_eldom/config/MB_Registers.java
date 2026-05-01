@@ -15,7 +15,7 @@ public class MB_Registers {
 	public static final int P5_INTERRUPTOR 		= 0x54;
 	public static final int P6_INTERRUPTOR 		= 0x62;
 	
-	public static final int P7_PIR          	= 0x70; 
+	public static final int P7_PIR          	= 0x70; // añadimos el codigo de la nueva practica y tambien en el desplegable
 
 	// Selecci�n configuraci�n Pr�ctica
 	public static final int SELPRACT[] = { P1_PULSADORES, P1_INTERRUPTOR, P1_CONMUTADOR, P3_CONMUTADOR, P4_PULSADORES,
@@ -29,8 +29,8 @@ public class MB_Registers {
 		// Discrete Output Coils
 		MB_PRACT(0), // Registro para indicar la pr�ctica con la que trabajamos
 		
-		MB_PIR_ENABLE(1),  // interruptor del pir
-		MB_PIR_TIMER(2),   // tiempo temporizador
+		MB_PIR_ENABLE(1),  // interruptor del pir 
+		MB_PIR_TIMER(2),   // manda el valor del deslizador
 		
 		MB_AREGS(3);
 
@@ -103,7 +103,7 @@ public class MB_Registers {
 				return 0;
 			case MB_OPT:
 				return 1;
-			case MB_PIR: // case para arrancar por defecto en 0
+			case MB_PIR: // case para arrancar por defecto en 0 (led apagado)
 				return 0;
 			default:
 				return -1;
