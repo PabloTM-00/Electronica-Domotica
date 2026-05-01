@@ -247,6 +247,13 @@ public class COMSerie_MainWindow {
 		P6_Interruptor.addActionListener(Select_Practica);
 		mnPrctica.add(P6_Interruptor);
 		
+		JMenu mnPractica_7 = new JMenu("Práctica 7 - Sensor PIR");
+		mnSeleccionarPrctica.add(mnPractica_7);
+		
+		JRadioButtonMenuItem P7_SensorPIR = new JRadioButtonMenuItem("Activar PIR");
+		P7_SensorPIR.addActionListener(Select_Practica);
+		mnPractica_7.add(P7_SensorPIR);
+		
 		menuBar.add(mnDomoboard);
 		
 		//=======================================================
@@ -353,6 +360,8 @@ public class COMSerie_MainWindow {
 		practicaSel.add(P4_Conmutador_2sal);
 		practicaSel.add(P5_Interruptor);
 		practicaSel.add(P6_Interruptor);
+		
+		practicaSel.add(P7_SensorPIR); // añadir boton al sistema
 		
 		Modbus_Regular_Call();
 		

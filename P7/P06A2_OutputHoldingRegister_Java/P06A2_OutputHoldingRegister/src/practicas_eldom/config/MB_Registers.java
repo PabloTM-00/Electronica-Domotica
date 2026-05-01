@@ -14,10 +14,12 @@ public class MB_Registers {
 	public static final int PRACTICAS_MODBUS 	= 0x50;
 	public static final int P5_INTERRUPTOR 		= 0x54;
 	public static final int P6_INTERRUPTOR 		= 0x62;
+	
+	public static final int P7_PIR          	= 0x70; 
 
 	// Selecci�n configuraci�n Pr�ctica
 	public static final int SELPRACT[] = { P1_PULSADORES, P1_INTERRUPTOR, P1_CONMUTADOR, P3_CONMUTADOR, P4_PULSADORES,
-			P4_INTERRUPTOR, P4_CONMUTADOR_INT, P4_CONMUTADOR_2SAL, P5_INTERRUPTOR, P6_INTERRUPTOR };
+			P4_INTERRUPTOR, P4_CONMUTADOR_INT, P4_CONMUTADOR_2SAL, P5_INTERRUPTOR, P6_INTERRUPTOR, P7_PIR};
 
 	public static int PRACTICE_SELECTED = 0x00;
 
@@ -26,7 +28,11 @@ public class MB_Registers {
 
 		// Discrete Output Coils
 		MB_PRACT(0), // Registro para indicar la pr�ctica con la que trabajamos
-		MB_AREGS(1);
+		
+		MB_PIR_ENABLE(1),  // interruptor del pir
+		MB_PIR_TIMER(2),   // tiempo temporizador
+		
+		MB_AREGS(3);
 
 		int reg;
 
@@ -72,7 +78,8 @@ public class MB_Registers {
 		MB_BTN1(0),
 		MB_BTN2(1),
 		MB_OPT(2),
-		MB_I_REGS(3);
+		MB_PIR(3), // avisa del movimiento del pir
+		MB_I_REGS(4);
 		
 		int reg;
 		
@@ -96,6 +103,8 @@ public class MB_Registers {
 				return 0;
 			case MB_OPT:
 				return 1;
+			case MB_PIR: // case para arrancar por defecto en 0
+				return 0;
 			default:
 				return -1;
 			}

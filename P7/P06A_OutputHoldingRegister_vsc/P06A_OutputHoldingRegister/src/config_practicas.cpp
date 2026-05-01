@@ -10,8 +10,8 @@
 /****************************************************************************/
 /***        Include files                                                 ***/
 /****************************************************************************/
-#include	"config_practicas.h"
-#include    "debuglog.h"
+#include "config_practicas.h"
+#include "debuglog.h"
 
 /****************************************************************************/
 /***                 Functions                                            ***/
@@ -135,6 +135,26 @@ void config_practica5_apt_4(){
 
 }
 
+void config_practica7(){
+    domoboard.Clear_SensorsConfiguration();
+    mbDomoboard.Clear_SensorsConfiguration();
+
+	// modo modbus
+	mbDomoboard.BOTON1.mbSensorEvent = mbInterruptor;
+    mbDomoboard.BOTON1.mbActuators.push(&mbDomoboard.RELE);
+    
+    mbDomoboard.BOTON2.mbSensorEvent = mbInterruptor;
+    mbDomoboard.BOTON2.mbActuators.push(&mbDomoboard.RELE);
+    
+    mbDomoboard.BTN_OPT.mbSensorEvent = mbInterruptor;
+    mbDomoboard.BTN_OPT.mbActuators.push(&mbDomoboard.RELE);
+
+    // configuramos pin del pir y loop del arduino
+    Init_PIR();
+    extern void epdRegisterLoop(void_callback_f callback);
+    epdRegisterLoop(loop_practica7);
+}
+
 void SelectionConfiguration(uint8_t selConf){
 	static uint8_t actConf = 0x00;
 
@@ -194,5 +214,10 @@ void SelectionConfiguration(uint8_t selConf){
 			config_practica5_apt_4();
 			break;
 
+		// codigo que manda el java para esta practica
+		case 0x70:
+			DEBUGLNF("P7 SENSOR PIR Seleccionado");
+			config_practica7();
+			break;
 	}
 }

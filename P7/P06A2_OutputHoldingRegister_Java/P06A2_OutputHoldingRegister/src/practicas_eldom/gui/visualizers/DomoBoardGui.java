@@ -42,7 +42,14 @@ public class DomoBoardGui extends JPanel implements Visualizer {
 	private			Led 				ledBtn2;
 	private			Led 				ledBtnOpt;
 	
-	//Banco de registros para mantener sincronizada la comunicaci髇 Modbus 
+	
+	// variables pir
+	private Led ledPir;               // movimiento
+	private javax.swing.JCheckBox chkPirEnable; // interruptor
+	private javax.swing.JSlider sldPirTimer;    // slider tiempo
+	private JLabel lblPirTimerValue;
+	
+	//Banco de registros para mantener sincronizada la comunicaci锟絥 Modbus 
 	private  		int 				Cregs[];
 	private  		int 				Dregs[];
 	
@@ -58,7 +65,7 @@ public class DomoBoardGui extends JPanel implements Visualizer {
 		
 		this.setLayout(null);
 		
-		//Crea Banco de registros para mantener sincronizada la comunicaci髇 Modbus 
+		//Crea Banco de registros para mantener sincronizada la comunicaci锟絥 Modbus 
 		Cregs = new int [MB_Registers.MB_Discrete_Output_Coils.MB_O_COILS.getReg()];
 		Dregs = new int [MB_Registers.MB_Discrete_Input_Contacts.MB_I_REGS.getReg()];
 		
@@ -141,6 +148,66 @@ public class DomoBoardGui extends JPanel implements Visualizer {
 		lblRel.setFont(new Font("Times New Roman", Font.PLAIN, 20));
 		lblRel.setBounds(119, 92, 70, 24);
 		panel_1.add(lblRel);
+		
+		
+		
+		JPanel panelPir = new JPanel();
+		panelPir.setBorder(new LineBorder(Color.RED, 2));
+		// Lo colocamos debajo de los botones y rel茅s (eje Y = 140)
+		panelPir.setBounds(10, 140, 404, 80); 
+		panelPir.setLayout(null);
+		add(panelPir);
+
+		JLabel lblPir = new JLabel("Control PIR (P7)");
+		lblPir.setFont(new Font("Times New Roman", Font.BOLD, 16));
+		lblPir.setBounds(10, 10, 150, 20);
+		panelPir.add(lblPir);
+
+		// LED Chivato de movimiento
+		ledPir = new Led();
+		ledPir.setBounds(150, 5, 30, 30);
+		panelPir.add(ledPir);
+
+		// Checkbox para Encender/Apagar el PIR desde Java
+		chkPirEnable = new javax.swing.JCheckBox("PIR Activado");
+		chkPirEnable.setSelected(true);
+		chkPirEnable.setBounds(10, 45, 120, 20);
+		panelPir.add(chkPirEnable);
+		
+		// EVENTO CHECKBOX: Al hacer clic, escribimos en el Registro Anal贸gico (Aregs[1])
+		chkPirEnable.addActionListener(e -> {
+			int val = chkPirEnable.isSelected() ? 1 : 0;
+			// Usamos la Funci贸n 06 (Write Single Register) para enviar la orden
+			ModBus_Communications.writeSingleRegister(address, MB_Registers.MB_Analog_Output_Holding.MB_PIR_ENABLE.getReg(), val, sn_Transport);
+		});
+
+		JLabel lblTimer = new JLabel("Temporizador:");
+		lblTimer.setBounds(130, 45, 90, 20);
+		panelPir.add(lblTimer);
+
+		// Slider para ajustar el tiempo (de 1 a 30 segundos, valor inicial 5)
+		sldPirTimer = new javax.swing.JSlider(1, 30, 5);
+		sldPirTimer.setBounds(220, 45, 120, 20);
+		panelPir.add(sldPirTimer);
+		
+		lblPirTimerValue = new JLabel("5 s");
+		lblPirTimerValue.setBounds(350, 45, 40, 20);
+		panelPir.add(lblPirTimerValue);
+
+		// EVENTO SLIDER 1: Solo actualiza el texto de la pantalla al arrastrar
+		sldPirTimer.addChangeListener(e -> {
+			lblPirTimerValue.setText(sldPirTimer.getValue() + " s");
+		});
+		
+		// EVENTO SLIDER 2: La magia Anti-Saturaci贸n. 
+		sldPirTimer.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseReleased(MouseEvent e) {
+				// Solo mandamos el dato a Arduino cuando el usuario SUELTA el rat贸n.
+				// Si lo hici茅ramos en el arrastre, colapsar铆amos el bus serie enviando cientos de tramas por segundo.
+				ModBus_Communications.writeSingleRegister(address, MB_Registers.MB_Analog_Output_Holding.MB_PIR_TIMER.getReg(), sldPirTimer.getValue(), sn_Transport);
+			}
+		});
 	}
 	
 	private void ONOFF_Bulb(LightBulb lightBulb){
@@ -246,6 +313,14 @@ public class DomoBoardGui extends JPanel implements Visualizer {
 				case MB_OPT:
 					ledBtnOpt.setLedOn((e.getRegs()[i] != mbDIC.getDefaultValue()));
 					break;
+				
+					
+				case MB_PIR:
+					// Lee el array DRegs que le manda Arduino y enciende nuestro nuevo LED
+					ledPir.setLedOn((e.getRegs()[i] != mbDIC.getDefaultValue()));
+					break;
+
+				
 				default:
 					break;
 				}

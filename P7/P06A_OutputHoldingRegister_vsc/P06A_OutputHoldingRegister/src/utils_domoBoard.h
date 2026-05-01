@@ -45,4 +45,7 @@ void mbInterruptor(void *mbSensor);
 extern bool stateConmutador;
 
 
+void Init_PIR(); 
+void loop_practica7();
+
 #endif /* UTILS_DOMOBOARD_H_ */

@@ -113,7 +113,50 @@ void mbInterruptor(void *mbSensor)
 	}
 }
 
+// definimos pin del pir y variables globales nuevas
+#define PIR_PIN 13 
+unsigned long tiempo_ultimo_movimiento = 0; // cronometro
+bool triac_encendido_por_pir = false;
 
+void Init_PIR() {
+    pinMode(PIR_PIN, INPUT);
+    // valores por defecto
+    Aregs[MB_PIR_ENABLE] = 1; // PIR esta activado por defecto
+    Aregs[MB_PIR_TIMER] = 3;  // 3 segundos por defecto
+}
 
+void loop_practica7() {
+	// leer sensor y guardar estado en Dregs para java
+    bool estado_pir = digitalRead(PIR_PIN);
+    Dregs[MB_PIR] = estado_pir ? 1 : 0;
 
+	// comprobar si el pir esta habilitado desde java y gestionar el pir/triac
+    if (Aregs[MB_PIR_ENABLE] == 1) {
+        if (estado_pir == HIGH) {
+			// si detecta movimiento enciende triac y resetea el cronometro
+            mbDomoboard.setmbActuator(&(mbDomoboard.TRIAC), sON);
+            tiempo_ultimo_movimiento = millis();
+            triac_encendido_por_pir = true;
+        }
+
+        // temporizador de apagado automatico si no detecta movimiento em un tiempo 
+        if (triac_encendido_por_pir && estado_pir == LOW) {
+            // transforma los segundos mandados por java a milisegundos porque 
+			// millis() funciona en eso
+            unsigned long tiempo_limite = Aregs[MB_PIR_TIMER] * 1000UL;
+
+			// apagar si la hora actual menos tiempo ult movimiento es >= limite
+            if (millis() - tiempo_ultimo_movimiento >= tiempo_limite) {
+                mbDomoboard.setmbActuator(&(mbDomoboard.TRIAC), sOFF);
+                triac_encendido_por_pir = false;
+            }
+        }
+    } else {
+		// apagar si se pide desde java
+		if (triac_encendido_por_pir) {
+            mbDomoboard.setmbActuator(&(mbDomoboard.TRIAC), sOFF);
+            triac_encendido_por_pir = false;
+        }
+    }
+}
 

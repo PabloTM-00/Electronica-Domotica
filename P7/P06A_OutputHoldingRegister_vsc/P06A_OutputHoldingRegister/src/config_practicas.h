@@ -32,6 +32,8 @@
 #define	P5_INTERRUPTOR				0x54
 #define	P6_INTERRUPTOR				0x62
 
+#define P7_SENSOR_PIR               0x70
+
 void SelectionConfiguration(uint8_t selConf);
 
 /****************************************************************************/
