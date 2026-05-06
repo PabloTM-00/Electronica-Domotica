@@ -40,10 +40,11 @@ enum {
 //Registros ModBus para variables analógicas "Analog Output Holding Register"
 enum{
 	MB_SELPRACT,		// Registro ModBus Para seleccionar la configuración del sistema
-	MB_A_REGS,			// Total de registros Analógicos
 
     MB_PIR_ENABLE, // interruptor, 1 encendido, 0 apagado
-    MB_PIR_TIMER  // tiempo en segundos que se deja el triac encendido
+    MB_PIR_TIMER, // tiempo en segundos que se deja el triac encendido
+
+	MB_A_REGS			// Total de registros Analógicos
 };
 
 /****************************************************************************/

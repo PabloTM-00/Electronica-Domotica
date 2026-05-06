@@ -113,7 +113,7 @@ void mbInterruptor(void *mbSensor)
 	}
 }
 
-// definimos pin del pir y variables globales nuevas
+// definir pin del pir y variables globales nuevas
 #define PIR_PIN 13 
 unsigned long tiempo_ultimo_movimiento = 0; // cronometro
 bool triac_encendido_por_pir = false;
@@ -121,7 +121,7 @@ bool triac_encendido_por_pir = false;
 void Init_PIR() {
     pinMode(PIR_PIN, INPUT);
     // valores por defecto
-    Aregs[MB_PIR_ENABLE] = 1; // PIR esta activado por defecto
+    Aregs[MB_PIR_ENABLE] = 1; // PIR activado por defecto
     Aregs[MB_PIR_TIMER] = 3;  // 3 segundos por defecto
 }
 
@@ -143,7 +143,8 @@ void loop_practica7() {
         if (triac_encendido_por_pir && estado_pir == LOW) {
             // transforma los segundos mandados por java a milisegundos porque 
 			// millis() funciona en eso
-            unsigned long tiempo_limite = Aregs[MB_PIR_TIMER] * 1000UL;
+            //unsigned long tiempo_limite = Aregs[MB_PIR_TIMER] * 1000UL;
+			unsigned long tiempo_limite = 30000UL; // 30 segundos fijos
 
 			// apagar si la hora actual menos tiempo ult movimiento es >= limite
             if (millis() - tiempo_ultimo_movimiento >= tiempo_limite) {

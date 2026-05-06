@@ -96,9 +96,9 @@ void  ModbusDomoboard::setmbActuator(TmbActuator *Actuator, TStateDigitalDev val
 	}
 
 	if(*(Actuator->mbReg) != newVal){
-		*(Actuator->mbReg) = newVal;
+		*(Actuator->mbReg) = newVal; //
 
-		setActuator(Actuator->actuator, *(Actuator->mbReg));
+		setActuator(Actuator->actuator, newVal); 
 
 	}
 }
