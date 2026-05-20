@@ -1,7 +1,6 @@
 package practicas_eldom.gui.visualizers;
 
-import java.awt.Component;
-import java.awt.Color;
+import java.awt.*;
 
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -26,6 +25,66 @@ import javax.swing.SwingConstants;
 import eu.hansolo.steelseries.extras.Led;
 import javax.swing.border.LineBorder;
 
+import javax.swing.border.TitledBorder;
+
+
+
+class AgujaPotenciometro extends JPanel {
+	private int value = 0;
+	private String name;
+
+	public AgujaPotenciometro(String name) {
+		this.name = name;
+		this.setOpaque(false); 
+	}
+
+	public void setValue(int v) {
+		this.value = v;
+		repaint(); // Obliga a Java a volver a dibujar la aguja con el nuevo valor
+	}
+
+	@Override
+	protected void paintComponent(Graphics g) {
+		super.paintComponent(g);
+		Graphics2D g2 = (Graphics2D) g;
+
+		// Activa el anti-aliasing para que las líneas salgan suaves y no pixeladas
+		g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+
+		int w = getWidth(); int h = getHeight();
+		int cx = w / 2;     int cy = h - 20; // Coordenadas del centro de la aguja
+		int r = Math.min(w, h) / 2 + 10; // Radio del arco
+
+		// Dibujar el arco de fondo
+		g2.setStroke(new BasicStroke(3));
+		g2.setColor(Color.GRAY);
+		g2.drawArc(cx - r, cy - r, r * 2, r * 2, 0, 180);
+
+		// COMENTARIO: Trigonometría. Calculamos el ángulo en base al valor (0-1023).
+		// Mapeamos 0-1023 a 180 grados (de izquierda a derecha).
+		double angle = Math.toRadians(180 - (value / 1023.0 * 180));
+
+		// Coordenadas del final de la aguja
+		int nx = (int) (cx + r * Math.cos(angle));
+		int ny = (int) (cy - r * Math.sin(angle));
+
+		// Dibujar la aguja en rojo
+		g2.setColor(Color.RED);
+		g2.setStroke(new BasicStroke(5));
+		g2.drawLine(cx, cy, nx, ny);
+		
+		// Un pequeño círculo central
+		g2.fillOval(cx-5, cy-5, 10, 10);
+
+		// Dibujar el texto del valor debajo
+		g2.setColor(Color.BLACK);
+		g2.setFont(new Font("Times New Roman", Font.BOLD, 12));
+		String text = name + ": " + value;
+		FontMetrics fm = g2.getFontMetrics();
+		g2.drawString(text, cx - fm.stringWidth(text) / 2, cy + 15);
+	}
+}
+
 public class DomoBoardGui extends JPanel implements Visualizer {
 	/**
 	 * 
@@ -43,6 +102,9 @@ public class DomoBoardGui extends JPanel implements Visualizer {
 	private			Led 				ledBtnOpt;
 	
 	
+	private AgujaPotenciometro gaugePot1;
+	private AgujaPotenciometro gaugePot2;
+	
 	// variables pir
 	private Led ledPir;               // movimiento
 	private javax.swing.JCheckBox chkPirEnable; // interruptor
@@ -52,6 +114,8 @@ public class DomoBoardGui extends JPanel implements Visualizer {
 	//Banco de registros para mantener sincronizada la comunicaci�n Modbus 
 	private  		int 				Cregs[];
 	private  		int 				Dregs[];
+	
+	private 		int 				Iregs[]; // nuevo array que guarda el valor del potenciometro
 	
 	private			 boolean     		stActualize = true;
 
@@ -68,6 +132,8 @@ public class DomoBoardGui extends JPanel implements Visualizer {
 		//Crea Banco de registros para mantener sincronizada la comunicaci�n Modbus 
 		Cregs = new int [MB_Registers.MB_Discrete_Output_Coils.MB_O_COILS.getReg()];
 		Dregs = new int [MB_Registers.MB_Discrete_Input_Contacts.MB_I_REGS.getReg()];
+		
+		Iregs = new int [2]; // 2 espacios para ambos potenciometros
 		
 		ma_lightBulb = new MouseAdapter() {
 			@Override
@@ -206,6 +272,30 @@ public class DomoBoardGui extends JPanel implements Visualizer {
 				ModBus_Communications.writeSingleRegister(address, MB_Registers.MB_Analog_Output_Holding.MB_PIR_TIMER.getReg(), sldPirTimer.getValue(), sn_Transport);
 			}
 		});
+		
+
+		JPanel panelPot = new JPanel();
+		panelPot.setBorder(new LineBorder(Color.BLUE, 2));
+		
+		// Le damos un poco más de altura (120 en lugar de 80) para que quepa el arco
+		panelPot.setBounds(10, 230, 404, 120); 
+		panelPot.setLayout(null);
+		add(panelPot);
+
+		JLabel lblPot = new JLabel("Potenciómetros (P8)");
+		lblPot.setFont(new Font("Times New Roman", Font.BOLD, 16));
+		lblPot.setBounds(10, 5, 200, 20);
+		panelPot.add(lblPot);
+
+		// COMENTARIO: Usamos nuestra clase personalizada
+		gaugePot1 = new AgujaPotenciometro("POT 1");
+		gaugePot1.setBounds(10, 30, 180, 80);
+		panelPot.add(gaugePot1);
+
+		gaugePot2 = new AgujaPotenciometro("POT 2");
+		gaugePot2.setBounds(210, 30, 180, 80);
+		panelPot.add(gaugePot2);
+
 	}
 	
 	private void ONOFF_Bulb(LightBulb lightBulb){
@@ -258,6 +348,10 @@ public class DomoBoardGui extends JPanel implements Visualizer {
 			//Read Discrete Inputs
 			buildModBus(1, Const_Modbus.READ_INPUT_DISCRETES, MB_Registers.MB_Discrete_Input_Contacts.MB_BTN1.getReg(),MB_Registers.MB_Discrete_Input_Contacts.MB_I_REGS.getReg(), Dregs);
 			
+			
+			// read analog input
+			// direccion 1, funciom 4 (input register) , registro inicial 0, cantidad 2 y  array de destino Iregs
+			buildModBus(1, 4, 0, 2, Iregs);
 		}
 	}
 	
@@ -323,13 +417,22 @@ public class DomoBoardGui extends JPanel implements Visualizer {
 					// lee el DRegs que le manda el arduino para encender el nuevo led
 					ledPir.setLedOn((e.getRegs()[i] != mbDIC.getDefaultValue()));
 					break;
-
 				
 				default:
 					break;
 				}
 			}
 			break;
+			
+			// COMENTARIO: Procesamos la respuesta de la función 0x04 (Potenciómetros)
+			case 4: 
+				// Recibimos el array de enteros (e.getRegs()) con valores 0-1023
+				if (e.getRegs() != null && e.getRegs().length >= 2) {
+					// --- CAMBIAR bar.setValue() POR gauge.setValue() ---
+					gaugePot1.setValue(e.getRegs()[0]); // Llama a repaint()
+					gaugePot2.setValue(e.getRegs()[1]);
+				}
+				break;
 		}				
 	}
 	

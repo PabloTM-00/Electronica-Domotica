@@ -23,7 +23,7 @@ public class MB_Registers {
 
 	public static int PRACTICE_SELECTED = 0x00;
 
-	// Analog Output Holding Registers
+	// Analog Output Holding 
 	public enum MB_Analog_Output_Holding {
 
 		// Discrete Output Coils
@@ -48,6 +48,24 @@ public class MB_Registers {
 			reg = rg;
 		}
 	}
+	
+	// nuevo mapeo de los input registers
+    public enum MB_Analog_Input_Registers {
+    	
+    	
+        MB_POT1(0), 
+        MB_POT2(1), 
+        MB_IN_REGS(2);
+
+        private final int reg;
+        
+        private MB_Analog_Input_Registers(int reg) { 
+            this.reg = reg; 
+        }
+        public int getReg() { 
+            return this.reg; 
+        }
+    }
 
 	
 	public enum MB_Discrete_Output_Coils {
