@@ -470,7 +470,7 @@ public class DomoBoardGui extends JPanel implements Visualizer {
 			        // convertir rango 0-1023 a rango voltaje 0-5V
 			        double voltaje = (rawTemp / 1023.0) * 5.0;
 			        
-			        // formula del TMP36 y offset de 500mV debido a
+			        // formula del TMP36 y offset de 500mV porque 0,5 V son 0 celsius 
 			        double celsius = (voltaje - 0.5) * 100.0;
 			        
 			        gaugeTemp.setValue(celsius);

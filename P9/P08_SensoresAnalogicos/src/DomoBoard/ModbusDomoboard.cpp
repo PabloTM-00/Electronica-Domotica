@@ -20,8 +20,7 @@
 uint16_t	Cregs[MB_O_COILS];		//Registros para "Dicrete Output Coils"
 uint16_t	Dregs[MB_I_CONTATCS];	//Registros para "Dicrete Input Contacts"
 uint16_t	Aregs[MB_A_REGS];		//Registros para "Analog Output Holding Registers"
-
-uint16_t 	Iregs[MB_IN_REGS];
+uint16_t	Iregs[MB_I_REGS];		//Registros para "Analog Input Registers"
 
 ModbusDomoboard mbDomoboard;
 
@@ -60,19 +59,31 @@ ModbusDomoboard::ModbusDomoboard():DomoBoard() {
 
 	listmbSensors.push(&PIR_MOV);
 
-	// conectar el sensor fisico con el registro modbus respectivo
-	// Iregs[MB_POT ]= POT . valor
+	//Initialize ModBus Analog sensors
 	POT1.Sensor = &(DomoBoard::POT1);
 	POT1.mbReg = &Iregs[MB_POT1];
-	// actualizar el registro modbus con el estado del sensor
-	*(POT1.mbReg) = POT1.Sensor->valor;
+
 	listmbSensors.push(&POT1);
 
 	POT2.Sensor = &(DomoBoard::POT2);
 	POT2.mbReg = &Iregs[MB_POT2];
-	*(POT2.mbReg) = POT2.Sensor->valor;
-	listmbSensors.push(&POT2);
 	
+	listmbSensors.push(&POT2);
+
+	FOTOR.Sensor = &(DomoBoard::FOTOR);
+	FOTOR.mbReg = &Iregs[MB_FOTOR];
+	*(FOTOR.mbReg) = FOTOR.Sensor->valor;
+	listmbSensors.push(&FOTOR);
+
+	TEMP.Sensor = &(DomoBoard::TEMP);
+	TEMP.mbReg = &Iregs[MB_TEMP];
+	*(TEMP.mbReg) = TEMP.Sensor->valor;
+	listmbSensors.push(&TEMP);
+
+	FOTOT.Sensor = &(DomoBoard::FOTOT);
+	FOTOT.mbReg = &Iregs[MB_FOTOT];
+	*(FOTOT.mbReg) = FOTOT.Sensor->valor;
+	listmbSensors.push(&FOTOT);
 
 	RELE.actuator 	= &(DomoBoard::RELE);
 	RELE.mbReg 		= &Cregs[MB_RELE];

@@ -58,38 +58,58 @@ DomoBoard::DomoBoard()
 	PIR_MOV.eSensor 	= S_DIGITAL;
 	PIR_MOV.name 		= F("PIR (Sensor de Movimiento)");
 
+	//==================================
+	//Inicialización Sensores Analógicos
+	//==================================
+	POT1.pin 			= POT1_P;
+	POT1.Activo 		= true;
+	POT1.eSensor 		= S_ANALOGICO;
+	POT1.name 			= F("POT 1");
+
+	POT2.pin 			= POT2_P;
+	POT2.Activo 		= true;
+	POT2.eSensor 		= S_ANALOGICO;
+	POT2.name 			= F("POT 2");
+
+	FOTOR.pin = FOTOR_P;
+	FOTOR.valor = analogRead(FOTOR_P);
+	FOTOR.valor_Df = FOTOR.valor;
+	FOTOR.Activo = true;
+	FOTOR.eSensor = S_ANALOGICO; 
+	FOTOR.name = F("Fotorresistencia");
+
+	TEMP.pin = TEMP_P;
+	TEMP.valor = analogRead(TEMP_P);
+	TEMP.valor_Df = TEMP.valor;
+	TEMP.Activo = true;
+	TEMP.eSensor = S_ANALOGICO;
+	TEMP.name = F("Temperatura TMP36");
+
+	FOTOT.pin = FOTOT_P;
+	FOTOT.valor = analogRead(FOTOT_P);
+	FOTOT.valor_Df = FOTOT.valor;
+	FOTOT.Activo = true;
+	FOTOT.eSensor = S_ANALOGICO;
+	FOTOT.name = F("Fototransistor");
+
+	//==================================
+	//Inicialización Actuadores
+	//==================================
 	RELE.pin 			= RELE_P;
 	RELE.estado 		= LOW;
 
 	TRIAC.pin 			= TRIAC_P;
 	TRIAC.estado 		= LOW;
 
-
-	// configurar potenciometros analogicos; devuelve  rango valores (0-1023)
-	POT1.pin = POT1_P;
-	POT1.valor = analogRead(POT1_P);
-	POT1.valor_Df = POT1.valor;
-	POT1.Activo = true;
-
-	//  marcado como "analogico" para que use analogread y no digitalread (lee tension 0-5V)
-	POT1.eSensor = S_ANALOGICO; 
-	POT1.name = F("Potenciometro 1");
-
-	POT2.pin = POT2_P;
-	POT2.valor = analogRead(POT2_P);
-	POT2.valor_Df = POT2.valor;
-	POT2.Activo = true;
-	POT2.eSensor = S_ANALOGICO;
-	POT2.name = F("Potenciometro 2");
-
 	listSensors.push(&BOTON1);
 	listSensors.push(&BOTON2);
 	listSensors.push(&BTN_OPT);
 	listSensors.push(&PIR_MOV);
-
-	// añado potenciometros a la lista de sensores
 	listSensors.push(&POT1);
 	listSensors.push(&POT2);
+	listSensors.push(&FOTOR);
+	listSensors.push(&TEMP);
+	listSensors.push(&FOTOT);
 }
 
 void DomoBoard::leerAllSensor(void){
@@ -110,13 +130,21 @@ void  DomoBoard::leerSensor(ptsSensor Sensor){
 			break;
 
 		case S_ANALOGICO:
-			valor = analogRead(Sensor->pin);
+			valor = analogRead(Sensor->pin);			
+
 			break;
 		}
 
 		if(Sensor->valor != valor)
 		{
 			Sensor->valor = valor;
+
+			if(Sensor->eSensor == S_ANALOGICO){
+				//Si el sensor es analógico, lo pasamos a un rango de 0-100
+				//DEBUGLOGLN("Sensor %s: %d - %ld", Sensor->name.c_str(), valor, map(Sensor->valor, 0, 1023, 0, 100));
+			}
+			//Si el sensor es digital, lo pasamos a un rango de 0-1
+
 
 			//Si hay un cambio en el estado del sensor llamamos a la aplicación asociada
 			if(Sensor->SensorEvent != NULL)

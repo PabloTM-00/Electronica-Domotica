@@ -95,24 +95,21 @@ enum {
 
 /* enum of supported modbus function codes. If you implement a new one, put its function code here ! */
 enum { 
-	FC_READ_COILS   =	0x01,	//Lectura de señales discretas de salida
-	FC_READ_REG_DI	=	0x02,	//Read contiguous block of discrete inputs
-	FC_READ_REG_AO	= 	0x03,   //Read contiguous block of holding register
-
-	FC_READ_INPUT_REGS = 0x04, //Read contiguous block of input registers
-
-	FC_WRITE_COIL   =   0x05,	//Escritura de una señal discreta
-	FC_WRITE_REG  	= 	0x06,   //Write single holding register
-	FC_WRITE_REGS 	= 	0x10  //Write block of contiguous registers
-
+	FC_READ_COILS   	=	0x01,	//Lectura de señales discretas de salida
+	FC_READ_REG_DI		=	0x02,	//Read contiguous block of discrete inputs
+	FC_READ_REG_AO		= 	0x03,   //Read contiguous block of holding register
+	FC_READ_INPUT_REGS	=   0x04,	//Read contiguous block of input registers
+	FC_WRITE_COIL   	=   0x05,	//Escritura de una señal discreta
+	FC_WRITE_REG  		= 	0x06,   //Write single holding register
+	FC_WRITE_REGS 		= 	0x10    //Write block of contiguous registers
 };
 
 /****************************************************************************/
 /***        Variables Locales                                             ***/
 /****************************************************************************/
 /* supported functions. If you implement a new one, put its function code into this array! */
-const unsigned char fsupported[] = { FC_READ_COILS, FC_READ_REG_DI, FC_READ_REG_AO, FC_READ_INPUT_REGS, FC_WRITE_COIL,
-		                             FC_WRITE_REG, FC_WRITE_REGS };
+const unsigned char fsupported[] = { FC_READ_COILS, FC_READ_REG_DI, FC_READ_REG_AO, FC_READ_INPUT_REGS, 
+									FC_WRITE_COIL, FC_WRITE_REG, FC_WRITE_REGS };
 HardwareSerial	*Serial485;
 
 ModbusSlave::ModbusSlave()
@@ -141,12 +138,14 @@ void ModbusSlave::set_BankRegisters(uint16_t *Regs, uint16_t lengthRegs, BankTyp
 			ARegs = Regs;
 			N_ARegs = lengthRegs;
 			break;
+
 		case BANK_INPUT_REGS:
 			IRegs = Regs;
 			N_IRegs = lengthRegs;
 			break;
 	}
 }
+
 
 /*
 CRC
@@ -463,13 +462,12 @@ int ModbusSlave::validate_request(unsigned char *data, unsigned char length)
 		regs_size = N_ARegs;
 		max_regs_num = MAX_READ_REGS;
 	}
+	else if (FC_READ_INPUT_REGS == data[FUNC]){
+		regs_size = N_IRegs;
+		max_regs_num = MAX_READ_REGS;
+	}
 	else if (FC_WRITE_REGS == data[FUNC]){
 
-	}
-
-	if (FC_READ_INPUT_REGS == data[FUNC]){
-    regs_size = N_IRegs;
-    max_regs_num = MAX_READ_REGS;
 	}
 
 	if ((regs_num < 1) || (regs_num > max_regs_num))
@@ -596,16 +594,46 @@ int ModbusSlave::read_discrete_registers(unsigned int Func, unsigned int start_a
  * reads the slave's holdings registers and sends them to the Modbus master
  *
  *************************************************************************/
-
+/*
 int ModbusSlave::read_holding_registers( unsigned int start_addr,unsigned char reg_count, uint16_t *regs)
 {
-	unsigned char function = FC_READ_REG_AO; 	/* Read Holding Registers */
+	unsigned char function = FC_READ_REG_AO; 	// Read Holding Registers 
 	int packet_size = 3;
 	int status;
 	unsigned int i;
 	unsigned char packet[MAX_MESSAGE_LENGTH];
 
 	build_read_packet(function, reg_count, packet);
+
+	for (i = start_addr; i < (start_addr + (unsigned int) reg_count);i++) {
+		packet[packet_size] = regs[i] >> 8;
+		packet_size++;
+		packet[packet_size] = regs[i] & 0x00FF;
+		packet_size++;
+	}
+
+	status = send_reply(packet, packet_size);
+
+	return (status);
+}
+
+
+/************************************************************************
+ *
+ * 	read_Analog_registers(first_register, number_of_registers, registers_array)
+ *
+ * reads the slave's analog registers and sends them to the Modbus master
+ *
+ *************************************************************************/
+int ModbusSlave::read_Analog_registers(unsigned char Func, unsigned int start_addr,unsigned char reg_count, uint16_t *regs)
+{
+	//unsigned char Func = FC_READ_REG_AO; 	/* Read Analog Input Registers */
+	int packet_size = 3;
+	int status;
+	unsigned int i;
+	unsigned char packet[MAX_MESSAGE_LENGTH];
+
+	build_read_packet(Func, reg_count, packet);
 
 	for (i = start_addr; i < (start_addr + (unsigned int) reg_count);i++) {
 		packet[packet_size] = regs[i] >> 8;
@@ -633,30 +661,6 @@ int ModbusSlave::read_holding_registers( unsigned int start_addr,unsigned char r
  *        0 or 1 disables this function (for a two-device network)
  *        >2 for point-to-multipoint topology (e.g. several arduinos)
  */
-
-
-// nueva funcion para leer los input registers 
-int ModbusSlave::read_input_registers( unsigned int start_addr,unsigned char reg_count, uint16_t *regs)
-{
-	unsigned char function = FC_READ_INPUT_REGS; 	// codigo 0x04
-	int packet_size = 3;
-	int status;
-	unsigned int i;
-	unsigned char packet[MAX_MESSAGE_LENGTH];
-
-	build_read_packet(function, reg_count, packet);
-
-	for (i = start_addr; i < (start_addr + (unsigned int) reg_count);i++) {
-		packet[packet_size] = regs[i] >> 8;
-		packet_size++;
-		packet[packet_size] = regs[i] & 0x00FF;
-		packet_size++;
-	}
-
-	status = send_reply(packet, packet_size);
-
-	return (status);
-}
 
 void ModbusSlave::configure(unsigned char slave, long baud, char parity, char txenpin)
 {
@@ -769,10 +773,11 @@ int ModbusSlave::update()
 		return read_discrete_registers(FC_READ_REG_DI, start_addr,query[REGS_L],DRegs);
 
 	case FC_READ_REG_AO:
-		return read_holding_registers(start_addr,query[REGS_L],ARegs);
+		//return read_holding_registers(start_addr,query[REGS_L],ARegs);
+		return read_Analog_registers(FC_READ_REG_AO, start_addr,query[REGS_L],ARegs);
 
 	case FC_READ_INPUT_REGS:
-		return read_input_registers(start_addr,query[REGS_L],IRegs);
+		return read_Analog_registers(FC_READ_INPUT_REGS, start_addr, query[REGS_L], IRegs);
 		
 	case FC_WRITE_REGS:
 //		return preset_multiple_registers(start_addr,query[REGS_L],query,A_Regs);
