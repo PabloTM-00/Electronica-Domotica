@@ -50,10 +50,10 @@ enum{
 enum{
 	MB_POT1,			// POTENCIÓMETRO 1
 	MB_POT2,			// POTENCIÓMETRO 2
-	MB_FOTOR, 
+	MB_FOTOR, 			// fotorresistencia y nuevos sensores analógicos
     MB_TEMP,  
 	MB_FOTOT, 
-    MB_IN_REGS			// Total de registros de Entrada
+    MB_I_REGS			// Total de registros de Entrada
 };
 
 /****************************************************************************/

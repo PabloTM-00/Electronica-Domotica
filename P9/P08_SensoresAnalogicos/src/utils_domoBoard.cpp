@@ -174,14 +174,7 @@ void mbConmutador(void *mbSensor)
 ///////////////
 
 void loop_practica9() {
-    int nivel_luz = Iregs[MB_FOTOR]; 
-    
-	// se enciende o se apaga el rele dependiendo del umbral de luz
-	    if (nivel_luz < 400) {
-        mbDomoboard.setmbActuator(&(mbDomoboard.RELE), sON);
-    } else {
-        mbDomoboard.setmbActuator(&(mbDomoboard.RELE), sOFF);
-    }
+   
 }
 
 

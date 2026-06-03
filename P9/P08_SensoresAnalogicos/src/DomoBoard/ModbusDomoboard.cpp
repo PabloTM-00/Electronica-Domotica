@@ -105,15 +105,14 @@ void ModbusDomoboard::leerSensor(TpmbSensor Sensor){
 	//compueba si el valor leído por el sensor difiere del valor almacenado en el registro correspondiente
 	//del banco de registros
 	if((int16_t)(*(Sensor->mbReg)) != Sensor->Sensor->valor){
-		//Estado Sensor ha cambiado
-		//Se actualiza el registro correspondiente con el nuevo valor leído en el sensor.
+		// cambia e estado del sensor
+		// se actualiza el registro correspondiente con el nuevo valor del sensor
 		*(Sensor->mbReg) = Sensor->Sensor->valor;
-		//Se inícia el evento asociado a la actualización del banco de registro correpondiente
 		if(Sensor->mbSensorEvent != NULL){
 			Sensor->mbSensorEvent(Sensor);
 		}
 	}else{
-		if((Sensor->asyncWait != NULL) && (Sensor->mbSensorEvent != NULL)){   //Para gestión de acciones temporizadas
+		if((Sensor->asyncWait != NULL) && (Sensor->mbSensorEvent != NULL)){  
 			Sensor->mbSensorEvent(Sensor);
 		}
 	}
@@ -154,4 +153,15 @@ void ModbusDomoboard::manager_mbActuators(TmbActuators *Actuators, TStateDigital
 
 void leeSensoresmb(void){
 	mbDomoboard.leerAllSensor();
+
+	Iregs[MB_POT1] = map(Iregs[MB_POT1], 0, 1023, 0, 100);
+	Iregs[MB_POT2] = map(Iregs[MB_POT2], 0, 1023, 0, 100);
+
+	Iregs[MB_FOTOR] = map(Iregs[MB_FOTOR], 0, 1023, 0, 100);
+	Iregs[MB_FOTOT] = map(Iregs[MB_FOTOT], 0, 1023, 0, 100);
+
+	float tension = (Iregs[MB_TEMP] / 1023.0) * 5.0;
+	float celsius = (tension - 0.5) * 100.0;
+	
+	Iregs[MB_TEMP] = (uint16_t)(celsius * 10.0);
 }

@@ -778,7 +778,7 @@ int ModbusSlave::update()
 
 	case FC_READ_INPUT_REGS:
 		return read_Analog_registers(FC_READ_INPUT_REGS, start_addr, query[REGS_L], IRegs);
-		
+				
 	case FC_WRITE_REGS:
 //		return preset_multiple_registers(start_addr,query[REGS_L],query,A_Regs);
 		break;

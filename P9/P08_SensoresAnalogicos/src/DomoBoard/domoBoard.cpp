@@ -61,15 +61,19 @@ DomoBoard::DomoBoard()
 	//==================================
 	//Inicialización Sensores Analógicos
 	//==================================
-	POT1.pin 			= POT1_P;
-	POT1.Activo 		= true;
-	POT1.eSensor 		= S_ANALOGICO;
-	POT1.name 			= F("POT 1");
+	POT1.pin = POT1_P;
+	POT1.valor = analogRead(POT1_P);
+	POT1.valor_Df = POT1.valor;     
+	POT1.Activo = true;
+	POT1.eSensor = S_ANALOGICO;
+	POT1.name = F("POT 1");
 
-	POT2.pin 			= POT2_P;
-	POT2.Activo 		= true;
-	POT2.eSensor 		= S_ANALOGICO;
-	POT2.name 			= F("POT 2");
+	POT2.pin = POT2_P;
+	POT2.valor = analogRead(POT2_P);
+	POT2.valor_Df = POT2.valor;     
+	POT2.Activo = true;
+	POT2.eSensor = S_ANALOGICO;
+	POT2.name = F("POT 2");
 
 	FOTOR.pin = FOTOR_P;
 	FOTOR.valor = analogRead(FOTOR_P);
